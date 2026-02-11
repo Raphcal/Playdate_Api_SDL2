@@ -1,0 +1,7 @@
+name=Poker Poker Magic
+author=Raphael Calabro
+description=Help Caroline to master her magic tricks by making cards disappear using poker hands.
+bundleID=fr.rca.pokerpokermagic
+imagePath=/
+version=1.7.4
+buildNumber=30

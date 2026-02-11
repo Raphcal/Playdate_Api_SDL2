@@ -24,7 +24,7 @@ FULLSCREENATSTARTUP ?= 0
 FORCE_ACCELERATED_RENDER ?= 0
 
 SRC_CPP_DIR = src/srcstub/sdl_rotate src/srcstub/gfx_primitives_surface src/srcstub/bump src/srcstub/bump/src src/srcstub src/srcstub/pd_api
-SRC_C_DIR = src/srcgame
+SRC_C_DIR = src/srcgame/src src/srcgame/lib src/srcgame/gen
 OBJ_DIR = ./obj
 OUT_DIR = ./Source
 SOURCE_DIR = Source

@@ -89,3 +89,6 @@ dkms.conf
 /Source_pebble
 /src/srcgame_bunny
 /src/srcgame_pebble
+
+.DS_Store
+xcuserdata/
