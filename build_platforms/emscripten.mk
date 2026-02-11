@@ -8,8 +8,13 @@ OPT_LEVEL = -O3
 CFLAGS = -Wno-error=implicit-function-declaration -sUSE_OGG=1 -sUSE_VORBIS=1 -sUSE_SDL=2 -sUSE_SDL_TTF=2 -sUSE_SDL_GFX=2 -sUSE_SDL_MIXER=2 -sUSE_SDL_IMAGE=2 -sSDL2_IMAGE_FORMATS='["png"]' -D_USE_MATH_DEFINES -DSDL2API -DTARGET_EXTENSION -Wall -Wextra -Wno-unused-parameter
 #memory size for game i took about 500 MB but some games require more
 EMSCRIPTEN_MEMORY_SIZE=536870912
+EMSCRIPTEN_ASYNCIFY=1
+EMSCRIPTEN_BUILD=1
 #no X11 lib
 LDUSEX11 = 0
+FFMPEG_OPTS=-vn -c:a libvorbis -q:a 5
+WINDOWSCALE=2
+FORCE_ACCELERATED_RENDER=1
 
 #reset Libs
 LDFLAGS = 

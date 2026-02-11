@@ -26,6 +26,7 @@ static int          _selectedIndex = 0;
 static LCDBitmap*   _menuImage     = NULL;
 static LCDBitmap*   _screenSnapshot  = NULL;
 static int          _menuImageXOff = 0;
+static LCDFont*     _menuFont      = NULL;
 
 // Tracks whether the menu button was held last frame (for edge detection)
 static bool         _prevMenuButton = false;
@@ -489,9 +490,13 @@ void pd_menu_render(void)
     const int panelH = LCD_ROWS;
     const int panelY = 0;
 
+    if (!_menuFont) {
+        const char *error = NULL;
+        _menuFont = Api->graphics->loadFont("fonts/Roobert-10-Bold", &error);
+    }
 
     Api->graphics->pushContext(_menuBitmap);
-    Api->graphics->setFont(NULL);
+    Api->graphics->setFont(_menuFont);
     Api->graphics->setDrawMode(kDrawModeCopy);
 
     // Draw game-provided menu image on the left half if set

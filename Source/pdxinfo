@@ -1,0 +1,7 @@
+name=Kuroobi
+author=Raphael Calabro
+description=Use martial arts to take down spaceships.
+bundleID=fr.rca.kuroobi
+imagePath=/
+version=1.2.1
+buildNumber=58
