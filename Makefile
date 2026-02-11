@@ -27,7 +27,7 @@ FORCE_ACCELERATED_RENDER ?= 0
 MASKPRIMITIVES ?= 1
 
 SRC_CPP_DIR = src/srcstub/sdl_rotate src/srcstub/gfx_primitives_surface src/srcstub/bump src/srcstub/bump/src src/srcstub src/srcstub/pd_api
-SRC_C_DIR = src/srcgame
+SRC_C_DIR = src/srcgame/src src/srcgame/lib src/srcgame/gen
 OBJ_DIR = ./obj
 OUT_DIR = ./Source
 SOURCE_DIR = Source
@@ -55,7 +55,7 @@ CPP_VERSION = c++17
 OUTPUT_ASSETS_DIR =
 CFLAGS = -D_USE_MATH_DEFINES -DSDL2API -DTARGET_EXTENSION -Wall -Wextra -Wno-unused-parameter -Wno-error=implicit-function-declaration
 LDFLAGS = -lSDL2_image -lSDL2_ttf -lSDL2_mixer -lSDL2_gfx
-CFLAGS_EXTRA = 
+CFLAGS_EXTRA =
 LDFLAGS_EXTRA =
 LDUSEX11 = 1
 
