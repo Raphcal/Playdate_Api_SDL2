@@ -134,15 +134,24 @@ static void loadStateIntro(OpeningScene * _Nonnull self) {
     LCDSprite *sprite = MELSpriteInitWithCenter(melSprite, &spriteTitle, MELPointZero);
     StrideSpriteTo(sprite, MELPointMake(0, 144.0f), 0.5f, 1.0f);
     playdate->sprite->setUpdateFunction(sprite, moveCameraRightAndDown);
+#if LOG_SPRITE_PUSH_AND_REMOVE_FROM_SCENE_SPRITES
+    playdate->system->logToConsole("loadStateIntro: push (%x, %x): %d", sprite, melSprite, melSprite->definition.name);
+#endif
     LCDSpriteRefListPush(&self->super.sprites, sprite);
 
     sprite = LayerSpriteConstructor(self->forestMap->layers + 0, loadMapLayer(MapNameOpeningForest, 0));
+#if LOG_SPRITE_PUSH_AND_REMOVE_FROM_SCENE_SPRITES
+    playdate->system->logToConsole("loadStateIntro: push (%x, %x): %d", sprite, melSprite, melSprite->definition.name);
+#endif
     LCDSpriteRefListPush(&self->super.sprites, sprite);
     for (unsigned int index = 1; index < self->forestMap->layerCount; index++) {
         LCDBitmap *bitmap = loadMapLayer(MapNameOpeningForest, index);
 
         sprite = LayerSpriteConstructorLooping(self->forestMap->layers + index, bitmap, MELIntPointZero);
         LayerSpriteSetCamera(sprite, &self->camera);
+#if LOG_SPRITE_PUSH_AND_REMOVE_FROM_SCENE_SPRITES
+    playdate->system->logToConsole("loadStateIntro: push (%x, %x): %d", sprite, melSprite, melSprite->definition.name);
+#endif
         LCDSpriteRefListPush(&self->super.sprites, sprite);
     }
 
@@ -152,12 +161,18 @@ static void loadStateIntro(OpeningScene * _Nonnull self) {
     loadSpriteOpeningCarolineRunningPalette();
     sprite = StrideConstructor(&spriteOpeningCarolineRunning, MELPointMake(-24, 200 - 144), MELPointMake(360, 410 - 144), 1.5f, 3.0f);
     playdate->sprite->setZIndex(sprite, zIndex);
+#if LOG_SPRITE_PUSH_AND_REMOVE_FROM_SCENE_SPRITES
+    playdate->system->logToConsole("loadStateIntro: push (%x, %x): %d", sprite, melSprite, melSprite->definition.name);
+#endif
     LCDSpriteRefListPush(&self->super.sprites, sprite);
 
     // Cérès
     loadSpriteOpeningCeresFlyingPalette();
     sprite = StrideConstructor(&spriteOpeningCeresFlying, MELPointMake(-45, 210 - 144), MELPointMake(320, 420 - 144), 1.5f, 3.0f);
     playdate->sprite->setZIndex(sprite, zIndex);
+#if LOG_SPRITE_PUSH_AND_REMOVE_FROM_SCENE_SPRITES
+    playdate->system->logToConsole("loadStateIntro: push (%x, %x): %d", sprite, melSprite, melSprite->definition.name);
+#endif
     LCDSpriteRefListPush(&self->super.sprites, sprite);
 
     MusicManagerPlay("musics/opening", 0, 0.2f);
@@ -171,19 +186,31 @@ static void loadStateHeroes(OpeningScene * _Nonnull self) {
     LCDSprite *sprite = MELSpriteInitWithCenter(melSprite, &spriteTitle, MELPointZero);
     melSprite->userdata = &self->camera;
     playdate->sprite->setUpdateFunction(sprite, moveCameraRight);
+#if LOG_SPRITE_PUSH_AND_REMOVE_FROM_SCENE_SPRITES
+    playdate->system->logToConsole("loadStateHeroes: push (%x, %x): %d", sprite, melSprite, melSprite->definition.name);
+#endif
     LCDSpriteRefListPush(&self->super.sprites, sprite);
 
     sprite = LayerSpriteConstructor(self->horizontalMap->layers + 0, loadMapLayer(MapNameIntroSeq1, 0));
+#if LOG_SPRITE_PUSH_AND_REMOVE_FROM_SCENE_SPRITES
+    playdate->system->logToConsole("loadStateHeroes: push (%x, %x): %d", sprite, melSprite, melSprite->definition.name);
+#endif
     LCDSpriteRefListPush(&self->super.sprites, sprite);
     for (unsigned int index = 1; index < self->horizontalMap->layerCount; index++) {
         LCDBitmap *bitmap = loadMapLayer(MapNameIntroSeq1, index);
 
         sprite = LayerSpriteConstructorLooping(self->horizontalMap->layers + index, bitmap, MELIntPointZero);
         LayerSpriteSetCamera(sprite, &self->camera);
+#if LOG_SPRITE_PUSH_AND_REMOVE_FROM_SCENE_SPRITES
+    playdate->system->logToConsole("loadStateHeroes: push (%x, %x): %d", sprite, melSprite, melSprite->definition.name);
+#endif
         LCDSpriteRefListPush(&self->super.sprites, sprite);
 
         sprite = LayerSpriteConstructorLooping(self->horizontalMap->layers + index, bitmap, (MELIntPoint) { .x = self->horizontalMap->size.width });
         LayerSpriteSetCamera(sprite, &self->camera);
+#if LOG_SPRITE_PUSH_AND_REMOVE_FROM_SCENE_SPRITES
+    playdate->system->logToConsole("loadStateHeroes: push (%x, %x): %d", sprite, melSprite, melSprite->definition.name);
+#endif
         LCDSpriteRefListPush(&self->super.sprites, sprite);
     }
 
@@ -192,15 +219,24 @@ static void loadStateHeroes(OpeningScene * _Nonnull self) {
     sprite = StrideConstructor(&spriteOpeningCaroline, MELPointMake(-spriteOpeningCaroline.size.width / 2.0f, 120.0f), MELPointMake(320.0f, 120.0f), 0.3f, 1.0f);
     StrideSetFillBlack(sprite);
     playdate->sprite->setZIndex(sprite, ZINDEX_DANSE);
+#if LOG_SPRITE_PUSH_AND_REMOVE_FROM_SCENE_SPRITES
+    playdate->system->logToConsole("loadStateHeroes: push (%x, %x): %d", sprite, melSprite, melSprite->definition.name);
+#endif
     LCDSpriteRefListPush(&self->super.sprites, sprite);
 
     sprite = StrideConstructor(&spriteOpeningCaroline, MELPointMake(-spriteOpeningCaroline.size.width / 2.0f, 120.0f), MELPointMake(320.0f, 120.0f), 0.2f, 1.0f);
     StrideSetFillBlack(sprite);
     playdate->sprite->setZIndex(sprite, ZINDEX_DANSE);
+#if LOG_SPRITE_PUSH_AND_REMOVE_FROM_SCENE_SPRITES
+    playdate->system->logToConsole("loadStateHeroes: push (%x, %x): %d", sprite, melSprite, melSprite->definition.name);
+#endif
     LCDSpriteRefListPush(&self->super.sprites, sprite);
  
     sprite = StrideConstructor(&spriteOpeningCaroline, MELPointMake(-spriteOpeningCaroline.size.width / 2.0f, 120.0f), MELPointMake(320.0f, 120.0f), 0.1f, 1.0f);
     playdate->sprite->setZIndex(sprite, ZINDEX_DANSE);
+#if LOG_SPRITE_PUSH_AND_REMOVE_FROM_SCENE_SPRITES
+    playdate->system->logToConsole("loadStateHeroes: push (%x, %x): %d", sprite, melSprite, melSprite->definition.name);
+#endif
     LCDSpriteRefListPush(&self->super.sprites, sprite);
 
     // Cérès
@@ -208,15 +244,24 @@ static void loadStateHeroes(OpeningScene * _Nonnull self) {
     sprite = StrideConstructor(&spriteOpeningCeres, MELPointMake(-spriteOpeningCeres.size.width / 2.0f, 90.0f), MELPointMake(207.0f, 90.0f), 1.2f, 1.0f);
     StrideSetFillBlack(sprite);
     playdate->sprite->setZIndex(sprite, ZINDEX_DANSE);
+#if LOG_SPRITE_PUSH_AND_REMOVE_FROM_SCENE_SPRITES
+    playdate->system->logToConsole("loadStateHeroes: push (%x, %x): %d", sprite, melSprite, melSprite->definition.name);
+#endif
     LCDSpriteRefListPush(&self->super.sprites, sprite);
 
     sprite = StrideConstructor(&spriteOpeningCeres, MELPointMake(-spriteOpeningCeres.size.width / 2.0f, 90.0f), MELPointMake(207.0f, 90.0f), 1.1f, 1.0f);
     StrideSetFillBlack(sprite);
     playdate->sprite->setZIndex(sprite, ZINDEX_DANSE);
+#if LOG_SPRITE_PUSH_AND_REMOVE_FROM_SCENE_SPRITES
+    playdate->system->logToConsole("loadStateHeroes: push (%x, %x): %d", sprite, melSprite, melSprite->definition.name);
+#endif
     LCDSpriteRefListPush(&self->super.sprites, sprite);
  
     sprite = StrideConstructor(&spriteOpeningCeres, MELPointMake(-spriteOpeningCeres.size.width / 2.0f, 90.0f), MELPointMake(207.0f, 90.0f), 1.0f, 1.0f);
     playdate->sprite->setZIndex(sprite, ZINDEX_DANSE);
+#if LOG_SPRITE_PUSH_AND_REMOVE_FROM_SCENE_SPRITES
+    playdate->system->logToConsole("loadStateHeroes: push (%x, %x): %d", sprite, melSprite, melSprite->definition.name);
+#endif
     LCDSpriteRefListPush(&self->super.sprites, sprite);
 
     // Clovis
@@ -224,15 +269,24 @@ static void loadStateHeroes(OpeningScene * _Nonnull self) {
     sprite = StrideConstructor(&spriteOpeningClovis, MELPointMake(LCD_COLUMNS + spriteOpeningClovis.size.width / 2.0f, 121.0f), MELPointMake(68.0f, 121.0f), 2.2f, 1.0f);
     StrideSetFillBlack(sprite);
     playdate->sprite->setZIndex(sprite, ZINDEX_DANSE);
+#if LOG_SPRITE_PUSH_AND_REMOVE_FROM_SCENE_SPRITES
+    playdate->system->logToConsole("loadStateHeroes: push (%x, %x): %d", sprite, melSprite, melSprite->definition.name);
+#endif
     LCDSpriteRefListPush(&self->super.sprites, sprite);
 
     sprite = StrideConstructor(&spriteOpeningClovis, MELPointMake(LCD_COLUMNS + spriteOpeningClovis.size.width / 2.0f, 121.0f), MELPointMake(68.0f, 121.0f), 2.1f, 1.0f);
     StrideSetFillBlack(sprite);
     playdate->sprite->setZIndex(sprite, ZINDEX_DANSE);
+#if LOG_SPRITE_PUSH_AND_REMOVE_FROM_SCENE_SPRITES
+    playdate->system->logToConsole("loadStateHeroes: push (%x, %x): %d", sprite, melSprite, melSprite->definition.name);
+#endif
     LCDSpriteRefListPush(&self->super.sprites, sprite);
  
     sprite = StrideConstructor(&spriteOpeningClovis, MELPointMake(LCD_COLUMNS + spriteOpeningClovis.size.width / 2.0f, 121.0f), MELPointMake(68.0f, 121.0f), 2.0f, 1.0f);
     playdate->sprite->setZIndex(sprite, ZINDEX_DANSE);
+#if LOG_SPRITE_PUSH_AND_REMOVE_FROM_SCENE_SPRITES
+    playdate->system->logToConsole("loadStateHeroes: push (%x, %x): %d", sprite, melSprite, melSprite->definition.name);
+#endif
     LCDSpriteRefListPush(&self->super.sprites, sprite);
 }
 
@@ -441,6 +495,12 @@ static void loadNextState(OpeningScene * _Nonnull self) {
     FadeSetOpacity(self->fade, 1.0f);
 
     LCDSpriteRefList sprites = self->super.sprites;
+#if LOG_SPRITE_PUSH_AND_REMOVE_FROM_SCENE_SPRITES
+    playdate->system->logToConsole("%d sprites to destroy", sprites.count);
+    for (int index = 0; index < sprites.count; index++) {
+        playdate->system->logToConsole("- %d: %x", index, sprites.memory[index]);
+    }
+#endif
     for (int index = sprites.count - 1; index >= 0; index--) {
         sprite = sprites.memory[index];
         if (sprite != self->fade) {

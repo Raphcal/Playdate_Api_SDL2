@@ -462,8 +462,6 @@ void MELAchievementSaveStatus(void) {
     };
     if (!jsonWriter.outputStream.file) {
         playdate->system->logToConsole("Unable open achievement file in write mode at path: %s", achievementsJsonPath);
-        playdate->system->realloc(achievementsJsonPath, 0);
-        playdate->system->realloc(rootPath, 0);
         return;
     }
 
