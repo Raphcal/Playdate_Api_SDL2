@@ -188,9 +188,8 @@ static int update(void * _Nonnull userdata) {
         return true;
     }
 
-    PDButtons pressed, pressing;
-    playdate->system->getButtonState(&pressing, &pressed, NULL);
-    if (pressed & kButtonB) {
+    const MELController controller = MELControllerMake();
+    if (controller.pressedB) {
         TitleScene *titleScene = TitleSceneAlloc();
         titleScene->initialMenuSelection = TitleMenuItemStory;
         MELSceneMakeCurrent(&titleScene->super);

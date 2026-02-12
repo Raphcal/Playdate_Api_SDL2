@@ -286,6 +286,7 @@ void OnlineScoresLoad(void) {
         "liammiller18",
         "pringus",
         "R2D21999",
+        "other",
     };
     const int max = scoreCount - (scoreAttackPersonalBest.player != NULL);
     for (unsigned int index = 0; index < max; index++) {
@@ -299,7 +300,7 @@ void OnlineScoresLoad(void) {
     if (scoreAttackPersonalBest.player) {
         unsigned int index = 0;
         for (; index < scoreCount; index++) {
-            if (scoreAttackPersonalBest.value > mockScores[index].value) {
+            if (scoreAttackPersonalBest.value > mockScores[index].value || (index == scoreCount - 1)) {
                 memmove(mockScores + index + 1, mockScores + index, sizeof(PDScore) * (scoreCount - 1 - index));
                 mockScores[index] = (PDScore) {
                     .player = MELStringCopy(scoreAttackPersonalBest.player),

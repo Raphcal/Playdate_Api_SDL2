@@ -51,7 +51,10 @@ uint32_t MELStringHash(const char * _Nullable key) {
     return hash;
 }
 
-char * _Nonnull MELStringCopy(const char * _Nullable source) {
+char * _Nullable MELStringCopy(const char * _Nullable source) {
+    if (source == NULL) {
+        return NULL;
+    }
     const unsigned int length = (unsigned int) strlen(source);
     char *copy = playdate->system->realloc(NULL, (length + 1) * sizeof(char));
     memcpy(copy, source, length * sizeof(char));

@@ -52,7 +52,7 @@ CPP_VERSION = c++17
 OUTPUT_ASSETS_DIR =
 CFLAGS = -D_USE_MATH_DEFINES -DSDL2API -DTARGET_EXTENSION -Wall -Wextra -Wno-unused-parameter -Wno-error=implicit-function-declaration
 LDFLAGS = -lSDL2_image -lSDL2_ttf -lSDL2_mixer -lSDL2_gfx
-CFLAGS_EXTRA = 
+CFLAGS_EXTRA = -DTARGET_SDL
 LDFLAGS_EXTRA =
 LDUSEX11 = 1
 

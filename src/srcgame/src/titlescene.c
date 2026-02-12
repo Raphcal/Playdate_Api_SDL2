@@ -415,10 +415,9 @@ static int updateTitle(void * _Nonnull userdata) {
 #endif
     self->time = time;
 
-    PDButtons pressed, pressing;
-    playdate->system->getButtonState(&pressing, &pressed, NULL);
+    const MELController controller = MELControllerMake();
     // Début du jeu
-    if (pressed & kButtonA) {
+    if (controller.pressedA) {
         LCDSprite *flyingCard = MELSceneFindSpriteByClassName(SpriteClassNameSelectFileFlyingCard);
         if (flyingCard == NULL) {
             MELAchievementLoadStatus(kAchievementData);
@@ -692,10 +691,9 @@ static int updateFileSelectIntro(void * _Nonnull userdata) {
 #endif
 
     SampleLoadNextSample();
-    PDButtons pressed, pressing;
-    playdate->system->getButtonState(&pressing, &pressed, NULL);
+    const MELController controller = MELControllerMake();
     // Début du jeu
-    if (pressed & kButtonA) {
+    if (controller.pressedA) {
         LCDSpriteRefList sprites = self->super.sprites;
         for (unsigned int index = 0; index < sprites.count; index++) {
             LCDSprite *sprite = sprites.memory[index];
@@ -706,7 +704,7 @@ static int updateFileSelectIntro(void * _Nonnull userdata) {
         }
         MELSpriteSetAnimation(self->fileSelectCaroline, AnimationNameWalk);
         MELPlayOnceAnimationSkip(self->fileSelectCaroline->animation);
-    } else if (pressed & kButtonB) {
+    } else if (controller.pressedB) {
         backFromFileSelectToTitle(self);
     }
 
@@ -738,9 +736,8 @@ static int updateFileSelect(void * _Nonnull userdata) {
     const int8_t oldSelection = self->selectedSaveGame;
     int8_t selection = oldSelection;
 
-    PDButtons pressed, pressing;
-    playdate->system->getButtonState(&pressing, &pressed, NULL);
-    if (pressed & kButtonA) {
+    const MELController controller = MELControllerMake();
+    if (controller.pressedA) {
         const MELBoolean isNewGame = selection == self->saveGames.count;
         if (isNewGame) {
             SaveGameCreate(&self->saveGames);
@@ -775,7 +772,7 @@ static int updateFileSelect(void * _Nonnull userdata) {
         MELGridViewRepaint(self->menuGridSprite);
         translateWithDirection(self, MELDirectionRight);
         return true;
-    } else if (pressed & kButtonB) {
+    } else if (controller.pressedB) {
         // Retire l'option de suppression
         if (deleteSaveGameMenuItem) {
             playdate->system->removeMenuItem(deleteSaveGameMenuItem);
@@ -788,9 +785,9 @@ static int updateFileSelect(void * _Nonnull userdata) {
         // Retourne à l'écran de titre
         backFromFileSelectToTitle(self);
         return true;
-    } else if (pressed & kButtonLeft) {
+    } else if (controller.pressedAxe.x < 0) {
         selection = MELIntMax(selection - 1, 0);
-    } else if (pressed & kButtonRight) {
+    } else if (controller.pressedAxe.x > 0) {
         selection = MELIntMin(selection + 1, MELIntMin(self->saveGames.count, 4));
     }
 
@@ -936,36 +933,35 @@ static int updateMenu(void * _Nonnull userdata) {
     }
 
     SampleLoadNextSample();
-    PDButtons pressed, pressing;
-    playdate->system->getButtonState(&pressing, &pressed, NULL);
+    const MELController controller = MELControllerMake();
     // Début du jeu
     int selection = self->menuGrid->selection.y;
     const int oldSelection = selection;
-    if (pressed & kButtonLeft) {
+    if (controller.pressedAxe.x < 0) {
         selection = MELIntMin(selection + 1, TitleMenuItemSchool);
-    } else if (pressed & kButtonRight) {
+    } else if (controller.pressedAxe.x > 0) {
         selection = MELIntMax(selection - 1, TitleMenuItemStory);
     }
     if (selection != oldSelection) {
         MELGridViewSetSelection(self->menuGridSprite, MELIntPointMake(0, selection));
     }
-    if ((pressed & kButtonA) && self->menuGrid->selection.y == TitleMenuItemStory) {
+    if (controller.pressedA && self->menuGrid->selection.y == TitleMenuItemStory) {
         StorySelectScene *storySelectScene = StorySelectSceneAlloc();
         MELSceneMakeCurrent(&storySelectScene->super);
         return true;
-    } else if ((pressed & kButtonA) && self->menuGrid->selection.y == TitleMenuItemScoreAttack) {
+    } else if (controller.pressedA && self->menuGrid->selection.y == TitleMenuItemScoreAttack) {
         ScoreAttackSelectScene *scoreAttackSelectScene = ScoreAttackSelectSceneAlloc();
         MELSceneMakeCurrent(&scoreAttackSelectScene->super);
         return true;
-    } else if ((pressed & kButtonA) && self->menuGrid->selection.y == TitleMenuItemArcade) {
+    } else if (controller.pressedA && self->menuGrid->selection.y == TitleMenuItemArcade) {
         RallyScoreScene *rallyScoreScene = RallyScoreSceneAlloc();
         MELSceneMakeCurrent(&rallyScoreScene->super);
         return true;
-    } else if ((pressed & kButtonA) && self->menuGrid->selection.y == TitleMenuItemSchool) {
+    } else if (controller.pressedA && self->menuGrid->selection.y == TitleMenuItemSchool) {
         LessonSelectScene *lessonScene = LessonSelectSceneAlloc();
         MELSceneMakeCurrent(&lessonScene->super);
         return true;
-    } else if (pressed & kButtonB) {
+    } else if (controller.pressedB) {
         self->menuGrid->disableInputs = true;
         clearAndRecreateCards(self);
 

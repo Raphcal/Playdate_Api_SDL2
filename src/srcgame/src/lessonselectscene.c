@@ -233,13 +233,12 @@ static int update(void * _Nonnull userdata) {
     currentSaveGame.playtime += DELTA;
     playdate->sprite->updateAndDrawSprites();
 
-    PDButtons pressed, pressing;
-    playdate->system->getButtonState(&pressing, &pressed, NULL);
-    if (pressed & kButtonA) {
+    const MELController controller = MELControllerMake();
+    if (controller.pressedA) {
         DialogScene *dialogScene = DialogSceneAllocWithLesson(kLessons.memory + self->gridView->selection.y);
         MELSceneMakeCurrent(&dialogScene->super);
         return true;
-    } else if (pressed & kButtonB) {
+    } else if (controller.pressedB) {
         TitleScene *titleScene = TitleSceneAlloc();
         titleScene->initialMenuSelection = TitleMenuItemSchool;
         MELSceneMakeCurrent(&titleScene->super);

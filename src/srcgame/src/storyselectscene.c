@@ -192,9 +192,8 @@ static int update(void * _Nonnull userdata) {
     currentSaveGame.playtime += DELTA;
     playdate->sprite->updateAndDrawSprites();
 
-    PDButtons pressed;
-    playdate->system->getButtonState(NULL, &pressed, NULL);
-    if (pressed & kButtonA) {
+    const MELController controller = MELControllerMake();
+    if (controller.pressedA) {
         const MELIntPoint selection = self->gridView->selection;
         const StoryName storyName = selection.x;
         const Story *story = kStories[storyName];
@@ -219,7 +218,7 @@ static int update(void * _Nonnull userdata) {
         }
         return true;
     }
-    else if (pressed & kButtonB) {
+    else if (controller.pressedB) {
         TitleScene *titleScene = TitleSceneAlloc();
         titleScene->initialMenuSelection = TitleMenuItemStory;
         MELSceneMakeCurrent(&titleScene->super);
@@ -251,9 +250,8 @@ static int updateDialog(void * _Nonnull userdata) {
             break;
     }
 
-    PDButtons pressed;
-    playdate->system->getButtonState(NULL, &pressed, NULL);
-    if (pressed & kButtonA) {
+    const MELController controller = MELControllerMake();
+    if (controller.pressedA) {
         // TODO: Fermer la boîte de dialogue avant de passer à la scène suivante.
         const MELIntPoint selection = self->gridView->selection;
         const StoryName storyName = selection.x;
@@ -268,7 +266,7 @@ static int updateDialog(void * _Nonnull userdata) {
             MapScene *mapScene = MapSceneAlloc(story, encounterIndex);
             MELSceneMakeCurrent(&mapScene->super);
         }
-    } else if (pressed & kButtonB) {
+    } else if (controller.pressedB) {
         MELDialogClose(self->dialog);
     }
     return true;
