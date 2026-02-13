@@ -90,5 +90,10 @@ dkms.conf
 /src/srcgame_bunny
 /src/srcgame_pebble
 
+node_modules/
+/assets/
+
+# macOS and Xcode files
 .DS_Store
 xcuserdata/
+

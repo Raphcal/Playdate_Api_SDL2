@@ -17,7 +17,13 @@
 
 #include "achievementtoast.h"
 
-#define AchievementBufferSize 255
+#define ACHIEVEMENT_BUFFER_SIZE 255
+
+#ifdef TARGET_SDL
+#define ACHIEVEMENT_ROOT "achievements"
+#else
+#define ACHIEVEMENT_ROOT "/Shared/achievements"
+#endif
 
 MELListImplement(MELAchievement);
 MELListImplement(MELAchievementStatus);
@@ -336,16 +342,16 @@ void parseFile(MELInputStream * _Nonnull self, const MELAchievementStatusRefDict
     }
 
     // Buffers
-    char id[AchievementBufferSize];
-    char key[AchievementBufferSize];
-    memset(id, 0, AchievementBufferSize);
-    memset(key, 0, AchievementBufferSize);
+    char id[ACHIEVEMENT_BUFFER_SIZE];
+    char key[ACHIEVEMENT_BUFFER_SIZE];
+    memset(id, 0, ACHIEVEMENT_BUFFER_SIZE);
+    memset(key, 0, ACHIEVEMENT_BUFFER_SIZE);
 
     // Recherche de la clef "achievements".
     nextItemStart = skipToNextItemStart(self);
     while (nextItemStart != EOF && nextItemStart != '}') {
         if (nextItemStart == '"') {
-            readJsonString(self, key, AchievementBufferSize, NULL);
+            readJsonString(self, key, ACHIEVEMENT_BUFFER_SIZE, NULL);
         } else {
             // Valeur incorrecte.
             playdate->system->logToConsole("Unable to parse achievements.json, expected: '\"', but was: %c", nextItemStart);
@@ -379,7 +385,7 @@ void parseFile(MELInputStream * _Nonnull self, const MELAchievementStatusRefDict
         MELAchievementStatus status = (MELAchievementStatus) {};
         while (nextItemStart != EOF && nextItemStart != '}') {
             if (nextItemStart == '"') {
-                readJsonString(self, key, AchievementBufferSize, NULL);
+                readJsonString(self, key, ACHIEVEMENT_BUFFER_SIZE, NULL);
             } else {
                 // Valeur incorrecte.
                 playdate->system->logToConsole("Unable to parse achievements.json, expected '\"' but was: %c", nextItemStart);
@@ -388,7 +394,7 @@ void parseFile(MELInputStream * _Nonnull self, const MELAchievementStatusRefDict
             skipToSeparator(self);
             nextItemStart = skipToValueStart(self);
             if (strcmp(key, "id") == 0 && nextItemStart == '"') {
-                readJsonString(self, id, AchievementBufferSize, NULL);
+                readJsonString(self, id, ACHIEVEMENT_BUFFER_SIZE, NULL);
             }
             else if (strcmp(key, "progress") == 0 && isNumberStart(nextItemStart)) {
                 status.progress = readJsonInt32Value(self);
@@ -441,7 +447,7 @@ void MELAchievementSaveStatus(void) {
 
     const MELMetadata metadata = MELMetadataGet();
 
-    MELPathConcat(rootPath, "/Shared/achievements", metadata.bundleID);
+    MELPathConcat(rootPath, ACHIEVEMENT_ROOT, metadata.bundleID);
     playdate->file->mkdir(rootPath);
 
     MELPathConcat(achievementsJsonPath, rootPath, "achievements.json");
@@ -461,7 +467,7 @@ void MELAchievementSaveStatus(void) {
         .isFileStart = true,
     };
     if (!jsonWriter.outputStream.file) {
-        playdate->system->logToConsole("Unable open achievement file in write mode at path: %s", achievementsJsonPath);
+        playdate->system->logToConsole("Unable to open achievement file in write mode at path: %s", achievementsJsonPath);
         return;
     }
 
@@ -526,7 +532,7 @@ void MELAchievementLoadStatus(const MELAchievementData data) {
         return;
     }
 
-    MELPathConcat(rootPath, "/Shared/achievements", metadata.bundleID);
+    MELPathConcat(rootPath, ACHIEVEMENT_ROOT, metadata.bundleID);
     MELPathConcat(achievementsJsonPath, rootPath, "achievements.json");
 
     playdate->system->logToConsole("Will read achievements from file: %s", achievementsJsonPath);
