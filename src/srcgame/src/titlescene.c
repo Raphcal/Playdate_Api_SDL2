@@ -113,8 +113,10 @@ static void init(MELScene * _Nonnull scene) {
 
     createMenuGrid(self);
 
+#ifndef TARGET_SDL
     spriteTitleSparks.animations[0]->type = MELAnimationTypeSynchronized;
     spriteTitleSparks.animations[MELAnimationDirectionCount]->type = MELAnimationTypeSynchronized;
+#endif
 
     MELSprite *dove = NULL;
 
