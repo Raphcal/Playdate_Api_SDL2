@@ -28,6 +28,7 @@ typedef enum {
     SampleCount
 } Sample;
 
+void SampleReset(void);
 MELBoolean SampleLoadNextSample(void);
 void SamplePlay(Sample sample);
 void SamplePlayWithRate(Sample sample, float rate);

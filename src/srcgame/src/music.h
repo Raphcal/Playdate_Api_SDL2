@@ -16,6 +16,7 @@ typedef struct {
     uint8_t current;
 } MusicManager;
 
+void MusicManagerReset(void);
 void MusicManagerPlay(const char * _Nonnull music, int repeat, float crossFadeDuration);
 void MusicManagerSetRate(float rate);
 void MusicManagerFadeOut(float duration);

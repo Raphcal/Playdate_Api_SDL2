@@ -68,3 +68,7 @@ void SamplePlay(Sample sample) {
 void SamplePlayWithRate(Sample sample, float rate) {
     playdate->sound->sampleplayer->play(samplePlayers[sample], 1, rate);
 }
+
+void SampleReset(void) {
+    memset(samplePlayers, 0, sizeof(SamplePlayer*) * SampleCount);
+}

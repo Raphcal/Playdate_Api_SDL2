@@ -65,6 +65,10 @@ void MusicManagerPlay(const char * _Nonnull music, int repeat, float crossFadeDu
     }
 }
 
+void MusicManagerReset(void) {
+    instance = (MusicManager) {};
+}
+
 void MusicManagerSetRate(float rate) {
     FilePlayer *currentPlayer = instance.filePlayers[instance.current];
     playdate->sound->fileplayer->setRate(currentPlayer, rate);

@@ -11,6 +11,8 @@
 #include "savegame.h"
 #include "scores.h"
 #include "achievements.h"
+#include "music.h"
+#include "samples.h"
 
 #include "../lib/melice.h"
 
@@ -107,6 +109,11 @@ static void loadFonts(void) {
     fontJfDotIzumi16Bold = LCDFontLoadOrError("fonts/JF-Dot-Izumi16B");
 }
 
+static void resetFonts(void) {
+    currentFont = NULL;
+    smallFont = NULL;
+}
+
 #ifdef _WINDLL
 __declspec(dllexport)
 #endif
@@ -125,6 +132,15 @@ int eventHandler(PlaydateAPI * _Nonnull api, PDSystemEvent event, uint32_t arg) 
             if (currentScene && currentScene->beforeQuit) {
                 currentScene->beforeQuit(currentScene);
             }
+#if TARGET_SDL
+            if (currentScene) {
+                currentScene->dealloc(currentScene);
+                currentScene = NULL;
+            }
+            MusicManagerReset();
+            SampleReset();
+            resetFonts();
+#endif
             LocalScoresSave();
             MELAchievementSaveStatus();
             break;
