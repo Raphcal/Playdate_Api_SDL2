@@ -134,7 +134,6 @@ static void greyOutAnimation(CharacterSprite * _Nonnull self, LCDSprite * _Nonnu
     graphics->pushContext(inactiveImage);
     graphics->setDrawMode(kDrawModeCopy);
     graphics->drawBitmap(frame, 0, 0, kBitmapUnflipped);
-    graphics->setDrawMode(kDrawModeBlackTransparent);
     graphics->fillRect(0, 0, width, height, kInactivePattern);
     graphics->popContext();
     graphics->setBitmapMask(inactiveImage, mask);

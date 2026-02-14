@@ -551,7 +551,7 @@ static void fadeTo(OpeningScene * _Nonnull self, OpeningSceneState state) {
         CardDeck deck = (CardDeck) {};
         float delay = 0.0f;
         loadSpriteFileSelectCardPalette();
-        for (unsigned int y = LCD_ROWS - spriteFileSelectCard.size.height / 2; y > 0; y -= spriteFileSelectCard.size.height) {
+        for (int y = LCD_ROWS - spriteFileSelectCard.size.height / 2; y > 0; y -= spriteFileSelectCard.size.height) {
             for (unsigned int x = spriteFileSelectCard.size.width / 2; x < LCD_COLUMNS; x += spriteFileSelectCard.size.width) {
                 const MELPoint origin = (MELPoint) {
                     .x = x,
