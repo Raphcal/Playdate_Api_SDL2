@@ -89,6 +89,8 @@ OpeningScene * _Nonnull OpeningSceneAlloc(void) {
 static void init(MELScene * _Nonnull scene) {
     OpeningScene *self = (OpeningScene *)scene;
 
+    camera.frame.origin = MELPointZero;
+
     setRefreshRate(DEFAULT_REFRESH_RATE);
 
     fadeTo(self, OpeningSceneStateIntro);

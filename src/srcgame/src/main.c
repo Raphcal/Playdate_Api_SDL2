@@ -107,11 +107,22 @@ static void loadFonts(void) {
     fontRoobert11MonoMediumNumerals = LCDFontLoadOrError("fonts/Roobert-11-Mono-Medium-Numerals");
     fontJfDotK14Bold = LCDFontLoadOrError("fonts/JF-Dot-K14B-2004");
     fontJfDotIzumi16Bold = LCDFontLoadOrError("fonts/JF-Dot-Izumi16B");
+    fontNontendoBold = LCDFontLoadOrError("fonts/Nontendo-Bold");
 }
 
 static void resetFonts(void) {
     currentFont = NULL;
     smallFont = NULL;
+}
+
+static void resetSpriteDefinitions(void) {
+    MELSpriteDefinition *definition;
+    for (SpriteName name = 0; (definition = SpriteNameGetDefinition(name)); name++) {
+        if (definition->palette) {
+            playdate->graphics->freeBitmapTable(definition->palette);
+            definition->palette = NULL;
+        }
+    }
 }
 
 #ifdef _WINDLL
@@ -132,17 +143,21 @@ int eventHandler(PlaydateAPI * _Nonnull api, PDSystemEvent event, uint32_t arg) 
             if (currentScene && currentScene->beforeQuit) {
                 currentScene->beforeQuit(currentScene);
             }
+            LocalScoresSave();
+            MELAchievementSaveStatus();
 #if TARGET_SDL
             if (currentScene) {
                 currentScene->dealloc(currentScene);
                 currentScene = NULL;
             }
+            currentSaveGame = (SaveGame) {
+                .index = kNoSaveSelected,
+            };
             MusicManagerReset();
             SampleReset();
             resetFonts();
+            resetSpriteDefinitions();
 #endif
-            LocalScoresSave();
-            MELAchievementSaveStatus();
             break;
         case kEventPause:
             // TODO: Afficher la carte via setMenuImage
