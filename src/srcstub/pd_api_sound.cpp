@@ -152,16 +152,14 @@ AudioSample* pd_api_sound_newSampleBuffer(int byteCount)
     return Tmp;
 }
 
-
-
-AudioSample* pd_api_sound_loadSample(const char* path)
-{    
-    printfDebug(DebugTraceFunctions, "pd_api_sound_loadSample\n");
+static char* _pd_api_sound_getFullPath(const char* path)
+{
     char ext[5];
-    char* fullpath = (char *) malloc((strlen(path) + 17) * sizeof(char));
+    const size_t maxLength = strlen(path) + 17;
+    char* fullpath = (char *) malloc(maxLength * sizeof(char));
     bool needextension = true;
     struct stat lstats;
-	if(strlen(path) > 4)
+    if(strlen(path) > 4)
     {
         strcpy(ext, path + (strlen(path) - 4));
         needextension = (strcasecmp(ext, ".WAV") != 0) &&  (strcasecmp(ext, ".MP3") != 0);
@@ -169,33 +167,33 @@ AudioSample* pd_api_sound_loadSample(const char* path)
 
     if (needextension)
     {
-        sprintf(fullpath,"./%s/%s.ogg", _pd_api_get_current_source_dir(), path);
+        snprintf(fullpath, maxLength, "./%s/%s.ogg", _pd_api_get_current_source_dir(), path);
         if(stat(fullpath, &lstats) != 0)
-		{
-			sprintf(fullpath,"./%s/%s.mp3", _pd_api_get_current_source_dir(), path);
-        	if(stat(fullpath, &lstats) != 0)
-			{
-            	sprintf(fullpath,"./%s/%s.wav", _pd_api_get_current_source_dir(), path);
-				if(stat(fullpath, &lstats) != 0)
-				{
-					sprintf(fullpath,"./%s.ogg", path);
-					if(stat(fullpath, &lstats) != 0)
-					{
-						sprintf(fullpath,"./%s.mp3", path);
-						if(stat(fullpath, &lstats) != 0)
-							sprintf(fullpath,"./%s.wav", path);
-					}
-				}
-			}
-		}
+        {
+            snprintf(fullpath, maxLength, "./%s/%s.mp3", _pd_api_get_current_source_dir(), path);
+            if(stat(fullpath, &lstats) != 0)
+            {
+                snprintf(fullpath, maxLength, "./%s/%s.wav", _pd_api_get_current_source_dir(), path);
+                if(stat(fullpath, &lstats) != 0)
+                {
+                    snprintf(fullpath, maxLength, "./%s.ogg", path);
+                    if(stat(fullpath, &lstats) != 0)
+                    {
+                        snprintf(fullpath, maxLength, "./%s.mp3", path);
+                        if(stat(fullpath, &lstats) != 0)
+                            snprintf(fullpath, maxLength, "./%s.wav", path);
+                    }
+                }
+            }
+        }
     }
     else
-	{
-        sprintf(fullpath, "./%s/%s", _pd_api_get_current_source_dir(), path);
+    {
+        snprintf(fullpath, maxLength, "./%s/%s", _pd_api_get_current_source_dir(), path);
         if(stat(fullpath, &lstats) != 0)
         {
             //check for ogg file with wav & mp3 files passed
-            sprintf(fullpath, "./%s/%s", _pd_api_get_current_source_dir(), path);
+            snprintf(fullpath, maxLength, "./%s/%s", _pd_api_get_current_source_dir(), path);
             char *ext = strrchr(fullpath, '.');
             if(ext)
             {
@@ -207,9 +205,16 @@ AudioSample* pd_api_sound_loadSample(const char* path)
                 }
             }
             if(stat(fullpath, &lstats) != 0)
-			    sprintf(fullpath, "./%s", path);            
+                snprintf(fullpath, maxLength, "./%s", path);
         }
-	}
+    }
+    return fullpath;
+}
+
+AudioSample* pd_api_sound_loadSample(const char* path)
+{    
+    printfDebug(DebugTraceFunctions, "pd_api_sound_loadSample\n");
+    char* fullpath = _pd_api_sound_getFullPath(path);
     
     AudioSample* tmp = NULL;
     
@@ -728,6 +733,8 @@ playdate_sound_sampleplayer* pd_api_sound_Create_playdate_sound_sampleplayer(voi
 //playdate_sound_fileplayer
 struct FilePlayer {
     SamplePlayer* Player;
+    Mix_Music* Music;
+    char* MusicPath;
 };
 
 FilePlayer* pd_api_sound_newFilePlayer(void)
@@ -735,6 +742,8 @@ FilePlayer* pd_api_sound_newFilePlayer(void)
     printfDebug(DebugTraceFunctions, "pd_api_sound_newFilePlayer\n");
     FilePlayer *Tmp = (FilePlayer*) malloc(sizeof(*Tmp));
     Tmp->Player = pd_api_sound_newSamplePlayer();
+    Tmp->Music = NULL;
+    Tmp->MusicPath = NULL;
     printfDebug(DebugTraceFunctions, "pd_api_sound_newFilePlayer end\n");
     return Tmp;
 }
@@ -752,6 +761,16 @@ void pd_api_sound_freeFilePlayer(FilePlayer* player)
         printfDebug(DebugTraceFunctions, "pd_api_sound_freeFilePlayer end player->Player = NULL\n");
         return;
     }
+    if(player->Music)
+    {
+        Mix_FreeMusic(player->Music);
+        player->Music = NULL;
+    }
+    if(player->MusicPath)
+    {
+        free(player->MusicPath);
+        player->MusicPath = NULL;
+    }
     pd_api_sound_freeSample(player->Player->sample);
     pd_api_sound_freeSamplePlayer(player->Player);
     free(player);
@@ -768,6 +787,15 @@ int pd_api_sound_loadIntoFilePlayer(FilePlayer* player, const char* path)
         printfDebug(DebugTraceFunctions, "pd_api_sound_loadIntoFilePlayer end player = NULL\n");
         return 0;
     }
+    char *fullpath = _pd_api_sound_getFullPath(path);
+    player->Music = Mix_LoadMUS(fullpath);
+    if(player->Music)
+    {
+        player->MusicPath = fullpath;
+        return 0;
+    }
+    else
+        free(fullpath);
     if(player->Player == NULL)
     {
         printfDebug(DebugTraceFunctions, "pd_api_sound_loadIntoFilePlayer end player->Player = NULL\n");
@@ -803,7 +831,11 @@ int pd_api_sound_FilePlayerplay(FilePlayer* player, int repeat)
         printfDebug(DebugTraceFunctions, "pd_api_sound_FilePlayerplay end player->Player = NULL\n");
         return -1;
     }
-    int tmp = pd_api_sound_playSamplePlayer(player->Player, repeat, 1.0f);
+    int tmp;
+    if(player->Music)
+        tmp = Mix_PlayMusic(player->Music, repeat - 1);
+    else
+        tmp = pd_api_sound_playSamplePlayer(player->Player, repeat, 1.0f);
     printfDebug(DebugTraceFunctions, "pd_api_sound_FilePlayerplay end\n");
     return tmp;
 }
@@ -821,7 +853,11 @@ int pd_api_sound_FilePlayerisPlaying(FilePlayer* player)
         printfDebug(DebugTraceFunctions, "pd_api_sound_FilePlayerisPlaying end player->Player = NULL\n");
         return -1;
     }
-    int tmp = pd_api_sound_isPlayingSamplePlayer(player->Player);
+    int tmp;
+    if(player->Music)
+        tmp = Mix_PlayingMusic();
+    else
+        tmp = pd_api_sound_isPlayingSamplePlayer(player->Player);
     printfDebug(DebugTraceFunctions, "pd_api_sound_FilePlayerisPlaying end\n");
     return tmp;
 }
@@ -839,7 +875,10 @@ void pd_api_sound_FilePlayerpause(FilePlayer* player)
         printfDebug(DebugTraceFunctions, "pd_api_sound_FilePlayerpause end player->Player = NULL\n");
         return;
     }
-    pd_api_sound_setPausedSamplePlayer(player->Player, 1);
+    if(player->Music)
+        Mix_PauseMusic();
+    else
+        pd_api_sound_setPausedSamplePlayer(player->Player, 1);
     printfDebug(DebugTraceFunctions, "pd_api_sound_FilePlayerpause end\n");
 }
 
@@ -856,7 +895,10 @@ void pd_api_sound_FilePlayerstop(FilePlayer* player)
         printfDebug(DebugTraceFunctions, "pd_api_sound_FilePlayerstop end player->Player = NULL\n");
         return;
     }
-    pd_api_sound_stopSamplePlayer(player->Player);
+    if(player->Music)
+        Mix_HaltMusic();
+    else
+        pd_api_sound_stopSamplePlayer(player->Player);
     printfDebug(DebugTraceFunctions, "pd_api_sound_FilePlayerstop end\n");
 }
 
@@ -873,7 +915,10 @@ void pd_api_sound_FilePlayersetVolume(FilePlayer* player, float left, float righ
         printfDebug(DebugTraceFunctions, "pd_api_sound_FilePlayersetVolume end player->Player = NULL\n");
         return;
     }
-    pd_api_sound_setVolumeSamplePlayer(player->Player, left, right);
+    if(player->Music)
+        Mix_VolumeMusic(MIX_MAX_VOLUME * (left + right)/2);
+    else
+        pd_api_sound_setVolumeSamplePlayer(player->Player, left, right);
     printfDebug(DebugTraceFunctions, "pd_api_sound_FilePlayersetVolume end\n");
 }
 
@@ -890,7 +935,12 @@ void pd_api_sound_FilePlayergetVolume(FilePlayer* player, float* left, float* ri
         printfDebug(DebugTraceFunctions, "pd_api_sound_FilePlayergetVolume end player->Player = NULL\n");
         return;
     }
-    pd_api_sound_getVolumeSamplePlayer(player->Player, left, right);
+    if(player->Music)
+    {
+        Mix_GetMusicVolume(player->Music);
+    }
+    else
+        pd_api_sound_getVolumeSamplePlayer(player->Player, left, right);
     printfDebug(DebugTraceFunctions, "pd_api_sound_FilePlayergetVolume end\n");
 }
 
@@ -926,7 +976,10 @@ void pd_api_sound_FilePlayersetOffset(FilePlayer* player, float offset)
         printfDebug(DebugTraceFunctions, "pd_api_sound_FilePlayersetOffset end player->Player = NULL\n");
         return;
     }
-    pd_api_sound_setOffsetSamplePlayer(player->Player, offset);
+    if(player->Music)
+        Mix_SetMusicPosition(offset);
+    else
+        pd_api_sound_setOffsetSamplePlayer(player->Player, offset);
     printfDebug(DebugTraceFunctions, "pd_api_sound_FilePlayersetOffset end\n");
 }
 
@@ -996,7 +1049,11 @@ float pd_api_sound_FilePlayergetOffset(FilePlayer* player)
         printfDebug(DebugTraceFunctions, "pd_api_sound_FilePlayergetOffset end player->Player = NULL\n");
         return 0.0f;
     }
-    float tmp = pd_api_sound_getOffsetSamplePlayer(player->Player);
+    float tmp;
+    if(player->Music)
+        tmp = Mix_GetMusicPosition(player->Music);
+    else
+        tmp = pd_api_sound_getOffsetSamplePlayer(player->Player);
     printfDebug(DebugTraceFunctions, "pd_api_sound_FilePlayergetOffset end\n");
     return tmp;
 }
