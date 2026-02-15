@@ -3564,22 +3564,22 @@ void _pd_api_gfx_checkBitmapNeedsRedraw(LCDBitmap *bitmap)
                 Uint32 *pixel = (Uint32*)((Uint8*)tmpTex->pixels + pixelIndex);
                 SDL_GetRGBA(*pixel, tmpTex->format, &color.r, &color.g, &color.b, &color.a);
 
-                const bool isClearColor = *pixel == clear;
-
-                if ((mustRedrawData || isClearColor) && (bitmap->BitmapDataData[byteIndex] & flag)) {
+                if (bitmap->BitmapDataData && (bitmap->BitmapDataData[byteIndex] & flag)) {
                     color.r = pd_api_gfx_color_white.r;
                     color.g = pd_api_gfx_color_white.g;
                     color.b = pd_api_gfx_color_white.b;
-                } else if (mustRedrawData || isClearColor) {
+                } else if (bitmap->BitmapDataData) {
                     color.r = pd_api_gfx_color_black.r;
                     color.g = pd_api_gfx_color_black.g;
                     color.b = pd_api_gfx_color_black.b;
                 }
 
-                if (mustRedrawMask && (bitmap->BitmapDataMask[byteIndex] & flag)) {
-                    
+                if (mustRedrawMask && (bitmap->BitmapDataMask[byteIndex] & flag))
+                {
                     color.a = SDL_ALPHA_OPAQUE;
-                } else if (mustRedrawMask) {
+                }
+                else if (mustRedrawMask)
+                {
                     color = pd_api_gfx_color_clear;
                 }
                 *pixel = SDL_MapRGBA(tmpTex->format, color.r, color.g, color.b, color.a);
