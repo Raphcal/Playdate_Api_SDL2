@@ -283,6 +283,7 @@ void pd_api_gfx_recreatemaskedimage(LCDBitmap* bitmap)
 		
 		if (MaskedTextureUnlocked && maskUnlocked && texUnlocked) 
 		{
+            SDL_Color color;
 			Uint32 whitethreshold = SDL_MapRGBA(bitmap->MaskedTex->format, pd_api_gfx_color_whitetreshold.r, pd_api_gfx_color_whitetreshold.g, pd_api_gfx_color_whitetreshold.b, pd_api_gfx_color_whitetreshold.a);
 			int width = std::min(bitmap->MaskedTex->w, tmpMask->w);
 			int height = std::min(bitmap->MaskedTex->h, tmpMask->h);
@@ -294,7 +295,8 @@ void pd_api_gfx_recreatemaskedimage(LCDBitmap* bitmap)
 					Uint32 *p2 = (Uint32*)((Uint8 *)tmpMask->pixels + (yy  * tmpMask->pitch) + (xx * tmpMask->format->BytesPerPixel));
 					Uint32 *p3 = (Uint32*)((Uint8 *)tmpTex->pixels + (yy  * tmpTex->pitch) + (xx * tmpTex->format->BytesPerPixel));
 					Uint32 p2val = *p2;
-					if(p2val > whitethreshold)
+                    SDL_GetRGBA(p2val, bitmap->MaskedTex->format, &color.r, &color.g,  &color.b,  &color.a);
+					if(color.a != SDL_ALPHA_TRANSPARENT && p2val > whitethreshold)
 					{
 						*p = *p3;
 					}
@@ -719,7 +721,7 @@ void pd_api_gfx_getBitmapData(LCDBitmap* bitmap, int* width, int* height, int* r
 	if(bitmap == NULL)
 		return;
 
-	int rb = (int)ceil(bitmap->w /8);
+	int rb = (int)ceil(bitmap->w /8.0f);
     if(rowbytes)
     {
         *rowbytes = rb;
@@ -752,27 +754,27 @@ void pd_api_gfx_getBitmapData(LCDBitmap* bitmap, int* width, int* height, int* r
 			unlocked = SDL_LockSurface(bitmap->Tex) == 0;
 		if (unlocked)
 		{
-			Uint32 clear = SDL_MapRGBA(bitmap->Tex->format, pd_api_gfx_color_clear.r, pd_api_gfx_color_clear.g, pd_api_gfx_color_clear.b, pd_api_gfx_color_clear.a);
 			Uint32 whitethreshold = SDL_MapRGBA(bitmap->Tex->format, pd_api_gfx_color_whitetreshold.r, pd_api_gfx_color_whitetreshold.g, pd_api_gfx_color_whitetreshold.b, pd_api_gfx_color_whitetreshold.a);
 			Uint32 blackthreshold = SDL_MapRGBA(bitmap->Tex->format, pd_api_gfx_color_blacktreshold.r, pd_api_gfx_color_blacktreshold.g, pd_api_gfx_color_blacktreshold.b, pd_api_gfx_color_blacktreshold.a);
-			Uint32 alpha = SDL_MapRGBA(bitmap->Tex->format,0,0,0,0);
+            SDL_Color color;
 			for (int y = 0; y < bitmap->h; y++)
 				for (int x = 0; x < bitmap->w; x++)
 				{
 					Uint32 *p = (Uint32*)((Uint8 *)bitmap->Tex->pixels + (y * bitmap->Tex->pitch) + (x * bitmap->Tex->format->BytesPerPixel));
 					Uint32 pval = *p;
-					if ((pval == alpha) || (pval == clear))
+                    SDL_GetRGBA(pval, bitmap->Tex->format, &color.r, &color.g,  &color.b,  &color.a);
+					if (color.a == 0)
 					{
 						if(mask)
-                        {
                             pd_api_gfx_drawpixel(*mask, x, y, rb, kColorBlack);
-                            maskChecksum += x + y * bitmap->w;
-                        }
 					}
 					else
 					{
 						if(mask)
+                        {
                             pd_api_gfx_drawpixel(*mask, x, y, rb, kColorWhite);
+                            maskChecksum += x + y * bitmap->w;
+                        }
 						
 						if(data)
 						{
@@ -1496,25 +1498,11 @@ void _pd_api_gfx_drawBitmapAll(LCDBitmap* bitmap, int x, int y, float xscale, fl
 					targetTextureUnlocked = SDL_LockSurface(drawtargetsurface) == 0;
 
 			//remember colors
-			Uint32 clear = SDL_MapRGBA(tmpTexture->format, pd_api_gfx_color_clear.r, pd_api_gfx_color_clear.g, pd_api_gfx_color_clear.b, pd_api_gfx_color_clear.a);
 			Uint32 white = SDL_MapRGBA(tmpTexture->format, pd_api_gfx_color_white.r, pd_api_gfx_color_white.g, pd_api_gfx_color_white.b, pd_api_gfx_color_white.a);
 			Uint32 black = SDL_MapRGBA(tmpTexture->format, pd_api_gfx_color_black.r, pd_api_gfx_color_black.g, pd_api_gfx_color_black.b, pd_api_gfx_color_black.a);
 			Uint32 blackthreshold = SDL_MapRGBA(tmpTexture->format, pd_api_gfx_color_blacktreshold.r, pd_api_gfx_color_blacktreshold.g, pd_api_gfx_color_blacktreshold.b, pd_api_gfx_color_blacktreshold.a);
 			Uint32 whitethreshold = SDL_MapRGBA(tmpTexture->format, pd_api_gfx_color_whitetreshold.r, pd_api_gfx_color_whitetreshold.g, pd_api_gfx_color_whitetreshold.b, pd_api_gfx_color_whitetreshold.a);
-			Uint32 alpha = SDL_MapRGBA(tmpTexture->format,0,0,0,0);
-			
-			if (clear <= blackthreshold)
-				printfDebug(DebugInfo,"clear color is lower than black threshold color this is wrong and will cause issues !\n");
-
-			if (clear >= whitethreshold)
-				printfDebug(DebugInfo,"clear color is bigger than white threshold color this is wrong and will cause issues !\n");
-			
-			if (clear >= white)
-				printfDebug(DebugInfo,"clear color is bigger than white color this is wrong and will cause issues !\n");
-			
-			if (clear <= black)
-				printfDebug(DebugInfo,"clear color is lower than white color this is wrong and will cause issues !\n");
-			
+            SDL_Color color, color2;
 			
 			//apply drawmode changes to the current tmpsurface only (we will draw it later with colorkey)
 			//like in case of clearpixel we will draw a cyan pixel that will be transparant
@@ -1533,14 +1521,10 @@ void _pd_api_gfx_drawBitmapAll(LCDBitmap* bitmap, int x, int y, float xscale, fl
 						{
 							Uint32 *p = (Uint32*)((Uint8 *)tmpTexture->pixels + (yy * tmpTexture->pitch) + (xx * tmpTexture->format->BytesPerPixel));
 							Uint32 pval = *p;
-							if ((pval == alpha))
-							{
-								*p = clear;
+                            SDL_GetRGBA(pval, tmpTexture->format, &color.r, &color.g,  &color.b,  &color.a);
+							if (color.a == SDL_ALPHA_TRANSPARENT || pval >= blackthreshold)
 								continue;
-							}
-							if ((pval == clear) || (pval >= blackthreshold))
-								continue;
-							*p = clear;
+							*p = SDL_MapRGBA(tmpTexture->format, color.r, color.g, color.b, 0);
 						}
 					}
 					break;
@@ -1555,14 +1539,10 @@ void _pd_api_gfx_drawBitmapAll(LCDBitmap* bitmap, int x, int y, float xscale, fl
 						{
 							Uint32 *p = (Uint32*)((Uint8 *)tmpTexture->pixels + (yy * tmpTexture->pitch) + (xx * tmpTexture->format->BytesPerPixel));
 							Uint32 pval = *p;
-							if ((pval == alpha))
-							{
-								*p = clear;
-								continue;
-							}
-							if ((pval == clear) || pval <= whitethreshold)
-								continue;
-							*p = clear;
+                            SDL_GetRGBA(pval, tmpTexture->format, &color.r, &color.g,  &color.b,  &color.a);
+                            if (color.a == SDL_ALPHA_TRANSPARENT || pval <= whitethreshold)
+                                continue;
+                            *p = SDL_MapRGBA(tmpTexture->format, color.r, color.g, color.b, 0);
 						}
 					}
 					break;
@@ -1577,13 +1557,9 @@ void _pd_api_gfx_drawBitmapAll(LCDBitmap* bitmap, int x, int y, float xscale, fl
 						{                   
 							Uint32 *p = (Uint32*)((Uint8 *)tmpTexture->pixels + (yy * tmpTexture->pitch) + (xx * tmpTexture->format->BytesPerPixel));
 							Uint32 pval = *p;
-							if ((pval == alpha))
-							{
-								*p = clear;
-								continue;
-							}
-							if ((pval == clear)  || (pval >= blackthreshold))
-								continue;
+                            SDL_GetRGBA(pval, tmpTexture->format, &color.r, &color.g,  &color.b,  &color.a);
+                            if (color.a == SDL_ALPHA_TRANSPARENT)
+                                continue;
 							*p = white;
 						}
 					}
@@ -1599,13 +1575,9 @@ void _pd_api_gfx_drawBitmapAll(LCDBitmap* bitmap, int x, int y, float xscale, fl
 						{
 							Uint32 *p = (Uint32*)((Uint8 *)tmpTexture->pixels + (yy * tmpTexture->pitch) + (xx * tmpTexture->format->BytesPerPixel));
 							Uint32 pval = *p;
-							if ((pval == alpha))
-							{
-								*p = clear;
-								continue;
-							}
-							if ((pval == clear) || (pval <= whitethreshold))
-								continue;
+                            SDL_GetRGBA(pval, tmpTexture->format, &color.r, &color.g,  &color.b,  &color.a);
+                            if (color.a == SDL_ALPHA_TRANSPARENT)
+                                continue;
 							*p = black;
 						}
 					}
@@ -1621,13 +1593,11 @@ void _pd_api_gfx_drawBitmapAll(LCDBitmap* bitmap, int x, int y, float xscale, fl
 						{
 							Uint32 *p = (Uint32*)((Uint8 *)tmpTexture->pixels + (yy * tmpTexture->pitch) + (xx * tmpTexture->format->BytesPerPixel));
 							Uint32 pval = *p;
-							if ((pval == alpha))
+                            SDL_GetRGBA(pval, tmpTexture->format, &color.r, &color.g,  &color.b,  &color.a);
+							if (color.a == SDL_ALPHA_TRANSPARENT)
 							{
-								*p = clear;
 								continue;
 							}
-							if ((pval == clear))
-								continue;
 							if (pval > whitethreshold)
 							{
 								*p = black;
@@ -1655,13 +1625,11 @@ void _pd_api_gfx_drawBitmapAll(LCDBitmap* bitmap, int x, int y, float xscale, fl
 							{
 								Uint32 *p = (Uint32*)((Uint8 *)tmpTexture->pixels + (yy * tmpTexture->pitch) + (xx * tmpTexture->format->BytesPerPixel));
 								Uint32 pval = *p;
-								if ((pval == alpha))
-								{
-									*p = clear;
-									continue;
-								}
-								if ((pval == clear) )
-									continue;
+                                SDL_GetRGBA(pval, tmpTexture->format, &color.r, &color.g,  &color.b,  &color.a);
+                                if (color.a == SDL_ALPHA_TRANSPARENT)
+                                {
+                                    continue;
+                                }
 								Uint32 *p2 = (Uint32*)((Uint8 *)drawtargetsurface->pixels + (yy  * drawtargetsurface->pitch) + (xx * drawtargetsurface->format->BytesPerPixel));
 								Uint32 p2val = *p2;
 								if (((pval > whitethreshold) && ((p2val < blackthreshold))) || 
@@ -1690,23 +1658,26 @@ void _pd_api_gfx_drawBitmapAll(LCDBitmap* bitmap, int x, int y, float xscale, fl
 							{
 								Uint32 *p = (Uint32*)((Uint8 *)tmpTexture->pixels + (yy * tmpTexture->pitch) + (xx * tmpTexture->format->BytesPerPixel));
 								Uint32 pval = *p;
-								if ((pval == alpha))
-								{
-									*p = clear;
-									continue;
-								}
-								if ((pval == clear) )
-									continue;
+                                SDL_GetRGBA(pval, tmpTexture->format, &color.r, &color.g,  &color.b,  &color.a);
+                                if (color.a == SDL_ALPHA_TRANSPARENT)
+                                {
+                                    continue;
+                                }
 								Uint32 *p2 = (Uint32*)((Uint8 *)drawtargetsurface->pixels + (yy  * drawtargetsurface->pitch) + (xx * drawtargetsurface->format->BytesPerPixel));
 								Uint32 p2val = *p2;
-								if (((pval > whitethreshold) && ((p2val < blackthreshold))) || 
+                                SDL_GetRGBA(p2val, tmpTexture->format, &color2.r, &color2.g,  &color2.b,  &color2.a);
+                                if (color2.a == SDL_ALPHA_TRANSPARENT)
+                                {
+                                    continue;
+                                }
+								if (((pval > whitethreshold) && ((p2val < blackthreshold))) ||
 									((pval < blackthreshold) && ((p2val> whitethreshold))))
 								{
 									*p = black;
 								}
 								else
 								{
-									if (*(Uint32 *)p != clear)
+									if (color.a != SDL_ALPHA_TRANSPARENT)
 									{
 										*p = white;
 									}
@@ -1734,7 +1705,7 @@ void _pd_api_gfx_drawBitmapAll(LCDBitmap* bitmap, int x, int y, float xscale, fl
 	}
 
 	Uint32 cclear = SDL_MapRGBA(tmpTexture->format, pd_api_gfx_color_clear.r, pd_api_gfx_color_clear.g, pd_api_gfx_color_clear.b, pd_api_gfx_color_clear.a);
-	SDL_SetColorKey(tmpTexture, SDL_TRUE, cclear);
+    SDL_SetSurfaceBlendMode(tmpTexture, SDL_BLENDMODE_BLEND);
 	SDL_BlitSurface(tmpTexture, NULL, _pd_api_gfx_CurrentGfxContext->DrawTarget->Tex, &dstrect);
 
 
@@ -3514,13 +3485,16 @@ void _pd_api_gfx_cleanUp()
 uint32_t _pd_api_gfx_getBitmapChecksum(LCDBitmap *bitmap, uint8_t *buffer)
 {
     uint32_t checksum = 0;
-    const unsigned int length = bitmap->w * bitmap->h;
-    for (unsigned int index = 0; index < length; index++)
+    const unsigned int rb = (int)ceil(bitmap->w /8.0f);
+    for (unsigned int y = 0; y < bitmap->h; y++)
     {
-        const int byteindex = index / 8;
-        const int indexinbyte = 1 << (index % 8);
-        if ((buffer[byteindex] & indexinbyte) != 0) {
-            checksum += index;
+        for (unsigned int x = 0; x < bitmap->w; x++)
+        {
+            const int byteIndex = x / 8 + y * rb;
+            const int flag = 1 << (uint8_t)(7 - (x % 8));
+            if ((buffer[byteIndex] & flag) != 0) {
+                checksum += x + y * bitmap->w;
+            }
         }
     }
     return checksum;
@@ -3546,9 +3520,8 @@ void _pd_api_gfx_checkBitmapNeedsRedraw(LCDBitmap *bitmap)
 
         if (texUnlocked)
         {
-            const Uint32 clear = SDL_MapRGBA(tmpTex->format, pd_api_gfx_color_clear.r, pd_api_gfx_color_clear.g, pd_api_gfx_color_clear.b, pd_api_gfx_color_clear.a);
-
             const unsigned int width = tmpTex->w;
+            const unsigned int rb = (int)ceil(width / 8.0f);
             const unsigned int count = width * tmpTex->h;
             for (unsigned int index = 0; index < count; index++)
             {
@@ -3556,9 +3529,9 @@ void _pd_api_gfx_checkBitmapNeedsRedraw(LCDBitmap *bitmap)
                 const int y = index / width;
                 const int pixelIndex = (y * tmpTex->pitch) + (x * tmpTex->format->BytesPerPixel);
 
-                const int byteIndex = index / 8;
-                const int indexInByte = index % 8;
-                const int flag = 1 << indexInByte;
+                const int byteIndex = x / 8 + rb * y;
+                const int indexInByte = x % 8;
+                const int flag = 1 << (uint8_t)(7 - (x % 8));
 
                 SDL_Color color;
                 Uint32 *pixel = (Uint32*)((Uint8*)tmpTex->pixels + pixelIndex);
@@ -3574,13 +3547,11 @@ void _pd_api_gfx_checkBitmapNeedsRedraw(LCDBitmap *bitmap)
                     color.b = pd_api_gfx_color_black.b;
                 }
 
-                if (mustRedrawMask && (bitmap->BitmapDataMask[byteIndex] & flag))
+                if (mustRedrawMask)
                 {
-                    color.a = SDL_ALPHA_OPAQUE;
-                }
-                else if (mustRedrawMask)
-                {
-                    color = pd_api_gfx_color_clear;
+                    color.a = (bitmap->BitmapDataMask[byteIndex] & flag)
+                        ? SDL_ALPHA_OPAQUE
+                        : SDL_ALPHA_TRANSPARENT;
                 }
                 *pixel = SDL_MapRGBA(tmpTex->format, color.r, color.g, color.b, color.a);
             }

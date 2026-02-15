@@ -33,7 +33,7 @@ double pd_api_elapsed;
 
 //mapped value of clear must lie between black and white and its value may not be bigger than whitethreshold or lower than blackthreshold
 
-SDL_Color  pd_api_gfx_color_clear = {128, 255, 255, SDL_ALPHA_OPAQUE};
+SDL_Color  pd_api_gfx_color_clear = {49, 47, 40, SDL_ALPHA_TRANSPARENT};
 SDL_Color  pd_api_gfx_color_white = {177, 175, 168, SDL_ALPHA_OPAQUE};
 SDL_Color  pd_api_gfx_color_black = {49, 47, 40, SDL_ALPHA_OPAQUE};
 SDL_Color  pd_api_gfx_color_whitetreshold = {155, 155, 155, SDL_ALPHA_OPAQUE};
@@ -52,9 +52,9 @@ bool _pd_do_load_next_source_dir = false;
 
 void _pd_load_source_colors()
 {
-	pd_api_gfx_color_clear = {128, 255, 255, SDL_ALPHA_OPAQUE};
 	pd_api_gfx_color_white = {177, 175, 168, SDL_ALPHA_OPAQUE};
 	pd_api_gfx_color_black = {49, 47, 40, SDL_ALPHA_OPAQUE};
+    pd_api_gfx_color_clear = {49, 47, 40, SDL_ALPHA_TRANSPARENT};
 	pd_api_gfx_color_whitetreshold = {155, 155, 155, SDL_ALPHA_OPAQUE};
 	pd_api_gfx_color_blacktreshold = {100, 100, 100, SDL_ALPHA_OPAQUE};
 	
@@ -64,10 +64,6 @@ void _pd_load_source_colors()
 	fp = fopen(Filename, "r");
 	if (fp)
 	{
-		fscanf(fp, "pd_api_gfx_color_clear_r=%hhd\n", &pd_api_gfx_color_clear.r);
-		fscanf(fp, "pd_api_gfx_color_clear_g=%hhd\n", &pd_api_gfx_color_clear.g);
-		fscanf(fp, "pd_api_gfx_color_clear_b=%hhd\n", &pd_api_gfx_color_clear.b);
-		
 		fscanf(fp, "pd_api_gfx_color_white_r=%hhd\n", &pd_api_gfx_color_white.r);
 		fscanf(fp, "pd_api_gfx_color_white_g=%hhd\n", &pd_api_gfx_color_white.g);
 		fscanf(fp, "pd_api_gfx_color_white_b=%hhd\n", &pd_api_gfx_color_white.b);
@@ -75,6 +71,9 @@ void _pd_load_source_colors()
 		fscanf(fp, "pd_api_gfx_color_black_r=%hhd\n", &pd_api_gfx_color_black.r);
 		fscanf(fp, "pd_api_gfx_color_black_g=%hhd\n", &pd_api_gfx_color_black.g);
 		fscanf(fp, "pd_api_gfx_color_black_b=%hhd\n", &pd_api_gfx_color_black.b);
+        pd_api_gfx_color_clear.r = pd_api_gfx_color_black.r;
+        pd_api_gfx_color_clear.g = pd_api_gfx_color_black.g;
+        pd_api_gfx_color_clear.b = pd_api_gfx_color_black.b;
 
 		fscanf(fp, "pd_api_gfx_color_whitetreshold_r=%hhd\n", &pd_api_gfx_color_whitetreshold.r);
 		fscanf(fp, "pd_api_gfx_color_whitetreshold_g=%hhd\n", &pd_api_gfx_color_whitetreshold.g);
