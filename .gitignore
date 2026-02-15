@@ -96,4 +96,7 @@ node_modules/
 # macOS and Xcode files
 .DS_Store
 xcuserdata/
-
+/html/package-lock.json
+/html/*.js
+/html/*.wasm
+/html/*.data

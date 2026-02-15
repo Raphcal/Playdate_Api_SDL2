@@ -1,0 +1,6 @@
+{
+    "name": "Poker Poker Magic",
+    "devDependencies": {
+        "serve": "^14.2.5"
+    }
+}

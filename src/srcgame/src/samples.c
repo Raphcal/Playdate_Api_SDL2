@@ -71,4 +71,5 @@ void SamplePlayWithRate(Sample sample, float rate) {
 
 void SampleReset(void) {
     memset(samplePlayers, 0, sizeof(SamplePlayer*) * SampleCount);
+    nextSample = 0;
 }
